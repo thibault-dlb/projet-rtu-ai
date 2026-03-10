@@ -42,8 +42,15 @@ def compute_all_metrics(y_true, y_pred_proba, threshold=0.5):
     # ROC AUC (handle constant predictions)
     try:
         metrics["roc_auc"] = roc_auc_score(y_true, y_pred_proba)
+        # Add ROC curve points for plotting
+        fpr, tpr, roc_thresholds = roc_curve(y_true, y_pred_proba)
+        metrics["roc_curve"] = {
+            "fpr": fpr.tolist(),
+            "tpr": tpr.tolist()
+        }
     except ValueError:
         metrics["roc_auc"] = 0.5 # Baseline for constant predictions
+        metrics["roc_curve"] = {"fpr": [0, 1], "tpr": [0, 1]}
         
     return metrics
 

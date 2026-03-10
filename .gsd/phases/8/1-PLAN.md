@@ -4,61 +4,58 @@ plan: 1
 wave: 1
 ---
 
-# Plan 8.1: Dashboard Global — Backend API & Frontend Setup
+# Plan 8.1: Dashboard Global — Pygame Launcher
 
 ## Objective
-Mettre en place la fondation de l'interface unifiée. Initialiser une application Next.js premium et un serveur Backend FastAPI qui servira de pont pour contrôler et monitorer les algorithmes d'IA.
+Créer un centre de contrôle unique en Pygame pour piloter tous les algorithmes d'IA (Random, Hill Climbing, GA, NEAT). L'interface doit permettre de régler les paramètres, de lancer l'entraînement/test, et de visualiser les progrès en temps réel sans quitter l'application.
 
 ## Context
 - .gsd/SPEC.md
-- .gsd/DECISIONS.md
-- shared/config.py (pour les paramètres des algos)
+- .gsd/DECISIONS.md (Pivot Pygame)
+- shared/config.py
 
 ## Tasks
 
 <task type="auto">
-  <name>Initialiser le Backend FastAPI (dashboard/backend/)</name>
-  <files>dashboard/backend/main.py, dashboard/backend/api.py, requirements_dashboard.txt</files>
+  <name>Créer le Framework UI Pygame (shared/ui.py)</name>
+  <files>shared/ui.py</files>
   <action>
-    Créer un serveur backend léger pour :
-    1. Lister les algorithmes disponibles et leurs hyperparamètres par défaut (via `shared.config`).
-    2. Endpoint pour lancer un algorithme avec paramètres personnalisés (utilisant `subprocess` ou `threading` pour ne pas bloquer l'API).
-    3. Système de WebSockets pour streamer les logs et les données de progression (fitness, itération actuelle) vers le frontend.
+    Développer des composants réutilisables en Pygame pour le dashboard :
+    1. `Button` : Avec états hover, press et callback.
+    2. `Slider` : Pour régler les hyperparamètres (itérations, pop size).
+    3. `Tabs` : Pour naviguer entre l'Overview et les différentes IAs.
+    4. `ProgressBar` : Pour le suivi de progression.
   </action>
-  <verify>Lancement manuel et test via Swagger UI (/docs)</verify>
-  <done>API capable de lister les algos et de lancer une exécution factice avec retour temps réel.</done>
+  <verify>Script de test rapide lançant une fenêtre avec ces composants.</verify>
+  <done>Composants UI fonctionnels et esthétiques.</done>
 </task>
 
 <task type="auto">
-  <name>Initialiser le Frontend Next.js (dashboard/frontend/)</name>
-  <files>dashboard/frontend/</files>
+  <name>Refactoriser les Visualiseurs d'Algos</name>
+  <files>algorithms/*/main.py</files>
   <action>
-    Initialiser une application Next.js 14+ avec :
-    1. Tailwind CSS pour le stylage.
-    2. Lucide-react pour les icônes.
-    3. Framer Motion pour les animations "WOW" (transitions de pages, menus fluides).
-    4. Créer le layout principal : Sidebar (navigation algos) et zone de contenu principale (Dashboard Global).
-    5. Implémenter un thème sombre premium (Glassmorphism, dégradés subtils).
+    Modifier les scripts `main.py` pour qu'ils puissent être importés comme classes/fonctions et s'injecter dans une surface Pygame parente au lieu de créer leur propre fenêtre `pygame.display.set_mode`.
   </action>
-  <verify>npm run dev sur le frontend</verify>
-  <done>Frontend accessible, design premium visible, navigation de base fonctionnelle.</done>
+  <verify>Vérifier que les algos peuvent tourner "en silence" ou dans une surface donnée.</verify>
+  <done>Algos isolés de leur gestion de fenêtre display.</done>
 </task>
 
 <task type="auto">
-  <name>Créer le Dashboard Global</name>
-  <files>dashboard/frontend/app/page.tsx</files>
+  <name>Développer dashboard.py</name>
+  <files>dashboard.py</files>
   <action>
-    Implémenter la page d'accueil du dashboard montrant :
-    1. Un résumé des performances de tous les algos (lu depuis `results/summary.md` via le backend).
-    2. Des graphiques de comparaison rapides (réutilisation des images matplotlib ou recréation en Recharts).
-    3. État actuel du projet (phases complétées).
+    Assembler le tout dans `dashboard.py` :
+    1. Menu latéral pour choisir l'algo.
+    2. Panneau central de contrôle (Hyperparamètres + Bouton Start/Stop).
+    3. Zone de visualisation (Graphiques temps réel + logs simplifiés).
+    4. Intégration du résumé global des performances.
   </action>
-  <verify>Visualisation des données du projet sur la home page</verify>
-  <done>Dashboard global affichant les derniers résultats connus.</done>
+  <verify>Lancement de `python dashboard.py`.</verify>
+  <done>Interface unifiée fonctionnelle.</done>
 </task>
 
 ## Success Criteria
-- [ ] Le backend peut piloter un script Python et récolter ses sorties.
-- [ ] Le frontend est esthétiquement réussi (WOW factor).
-- [ ] La communication temps réel (WebSocket) est établie.
-- [ ] L'utilisateur peut naviguer entre le dashboard et les pages spécifiques de chaque IA.
+- [ ] Un seul script `dashboard.py` contrôle tout le projet.
+- [ ] Les paramètres sont réglables via des sliders/boutons (pas de ligne de commande).
+- [ ] Le look est "Premium" (Cyber-style, animations fluides).
+- [ ] Les visualisations d'entraînement s'affichent correctement dans l'interface principale.

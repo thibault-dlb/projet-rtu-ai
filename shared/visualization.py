@@ -21,7 +21,7 @@ def _load_all_metrics():
         return all_metrics
         
     for file in os.listdir(METRICS_DIR):
-        if file.endswith("_metrics.json"):
+        if file.endswith("_metrics.json") and not file.startswith("."):
             algo_id = file.replace("_metrics.json", "")
             try:
                 with open(os.path.join(METRICS_DIR, file), 'r') as f:
@@ -29,6 +29,22 @@ def _load_all_metrics():
             except Exception as e:
                 print(f"  [Error] Failed to load {file}: {e}")
     return all_metrics
+
+def _load_all_resources():
+    """Load all resource stats from METRICS_DIR."""
+    all_resources = {}
+    if not os.path.exists(METRICS_DIR):
+        return all_resources
+        
+    for file in os.listdir(METRICS_DIR):
+        if file.endswith("_resources.json"):
+            algo_id = file.replace("_resources.json", "")
+            try:
+                with open(os.path.join(METRICS_DIR, file), 'r') as f:
+                    all_resources[algo_id] = json.load(f)
+            except Exception as e:
+                print(f"  [Error] Failed to load {file}: {e}")
+    return all_resources
 
 def plot_metrics_comparison():
     """Create grouped barplot for performance metrics comparison."""
@@ -116,11 +132,81 @@ def interactive_threshold_viewer(y_true, y_pred_proba, algo_name):
     plt.suptitle(f"Analyse Interactive du Seuil - {ALGO_DISPLAY_NAMES.get(algo_name, algo_name)}")
     plt.show()
 
+def plot_resource_comparison():
+    """Create plots for time and memory comparison."""
+    res_data = _load_all_resources()
+    if not res_data:
+        return
+
+    algos = list(res_data.keys())
+    # Sort for consistent display
+    algos.sort()
+    
+    display_names = [ALGO_DISPLAY_NAMES.get(a, a) for a in algos]
+    times = [res_data[a].get('elapsed_time_sec', 0) for a in algos]
+    mems = [res_data[a].get('peak_memory_mb', 0) for a in algos]
+    colors = [ALGO_COLORS.get(a, '#95a5a6') for a in algos]
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+    plt.style.use('seaborn-v0_8-darkgrid')
+
+    # Time plot
+    ax1.barh(display_names, times, color=colors)
+    ax1.set_title("Temps d'Entraînement (secondes)")
+    ax1.set_xlabel("Secondes")
+    for i, v in enumerate(times):
+        ax1.text(v + 0.1, i, f"{v:.2f}s", va='center')
+
+    # Memory plot
+    ax2.barh(display_names, mems, color=colors)
+    ax2.set_title("Utilisation Mémoire Pic (Mo)")
+    ax2.set_xlabel("Mo")
+    for i, v in enumerate(mems):
+        ax2.text(v + 0.1, i, f"{v:.1f}MB", va='center')
+
+    plt.tight_layout()
+    save_path = os.path.join(PLOTS_DIR, "resource_comparison.png")
+    plt.savefig(save_path)
+    plt.close()
+    print(f"  [Plot] Comparaison ressources sauvegardée dans {save_path}")
+
+def plot_roc_curves():
+    """Superimpose ROC curves of all algorithms."""
+    metrics_data = _load_all_metrics()
+    if not metrics_data:
+        return
+
+    plt.figure(figsize=(10, 8))
+    plt.style.use('seaborn-v0_8-darkgrid')
+    
+    # Baseline 50%
+    plt.plot([0, 1], [0, 1], 'k--', alpha=0.5, label="Aléatoire (Théorique)")
+
+    for algo, data in metrics_data.items():
+        if "roc_curve" in data:
+            fpr = data["roc_curve"]["fpr"]
+            tpr = data["roc_curve"]["tpr"]
+            auc = data.get("roc_auc", 0)
+            plt.plot(fpr, tpr, label=f"{ALGO_DISPLAY_NAMES.get(algo, algo)} (AUC={auc:.3f})",
+                     color=ALGO_COLORS.get(algo), linewidth=2)
+
+    plt.xlabel('Taux de Faux Positifs')
+    plt.ylabel('Taux de Vrais Positifs')
+    plt.title('Comparaison des Courbes ROC', fontsize=14)
+    plt.legend(loc='lower right')
+    plt.tight_layout()
+    
+    save_path = os.path.join(PLOTS_DIR, "roc_curves.png")
+    plt.savefig(save_path)
+    plt.close()
+    print(f"  [Plot] Courbes ROC sauvegardées dans {save_path}")
+
 def generate_all_plots():
     """Generate all baseline plots."""
     print("\nGénération des graphiques comparatifs...")
     plot_metrics_comparison()
-    # Add confusion matrix and ROC curves once data is available in later phases
+    plot_resource_comparison()
+    plot_roc_curves()
     print("Graphiques générés.")
 
 if __name__ == "__main__":

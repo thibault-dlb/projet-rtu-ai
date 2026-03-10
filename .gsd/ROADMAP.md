@@ -79,11 +79,12 @@ comparatifs et les prédictions sur les données inconnues
 - Intégration dans les résultats comparatifs
 **Dependencies**: Phase 5
 
-### Phase 8: FrontEnd — Dashboard Global
+### Phase 8: Dashboard Global (Pygame)
 **Status**: ⬜ Not Started
-**Objective**: Créer une interface unifiée pour piloter l'ensemble du projet, lancer les algorithmes et tout visualiser sans passer par la ligne de commande.
+**Objective**: Créer une interface unifiée en Pygame pour piloter l'ensemble du projet, régler les hyperparamètres et visualiser l'évolution de chaque IA dans une fenêtre unique.
 **Deliverables**:
-- Interface principale (Dashboard) intégrée
-- Contrôle des algorithmes (Lancement / Stop) via GUI
-- Affichage des graphiques et métriques en temps réel
+- `dashboard.py` (Point d'entrée unique)
+- UI Components Pygame (Boutons, Sliders, Tabs)
+- Intégration des visualisations d'entraînement
+- Affichage des graphiques de synthèse
 **Dependencies**: Phase 6

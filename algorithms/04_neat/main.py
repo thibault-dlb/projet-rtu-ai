@@ -10,7 +10,6 @@ import pickle
 import numpy as np
 import pygame
 import neat
-
 import argparse
 
 # Set path to root for shared module access
@@ -28,227 +27,144 @@ from shared.metrics import (
 )
 from shared.resource_monitor import ResourceMonitor, save_resource_stats
 
-# --- Pygame Visualizer Class ---
-class NEATVisualizer:
-    def __init__(self, width=1000, height=700):
-        pygame.init()
-        self.width = width
-        self.height = height
-        self.screen = pygame.display.set_mode((width, height))
-        pygame.display.set_caption("IA NEAT - Évolution de Topologie")
-        self.font = pygame.font.SysFont("Arial", 22)
-        self.label_font = pygame.font.SysFont("Arial", 14)
-        
-    def render(self, generation, best_genome, config, info_text=""):
-        """Draw the neural network topology of the best genome."""
-        self.screen.fill((20, 15, 25)) # Dark purple tint
-        
-        # 1. Draw Title
-        title = self.font.render(f"NEAT - Génération {generation}", True, (255, 255, 255))
-        self.screen.blit(title, (20, 20))
-        if info_text:
-            info = self.label_font.render(info_text, True, (200, 200, 200))
-            self.screen.blit(info, (20, 50))
-            
-        # 2. Layout Nodes
-        # neat-python uses negative IDs for inputs, positive for outputs/hidden
-        # We need to map genome.nodes and genome.connections
-        
-        input_nodes = config.genome_config.input_keys
-        output_nodes = config.genome_config.output_keys
-        
-        # Find hidden nodes (nodes that are NOT inputs and NOT outputs)
-        hidden_nodes = [node_id for node_id in best_genome.nodes.keys() if node_id not in output_nodes]
-        hidden_nodes = [n for n in hidden_nodes if n not in input_nodes]
-        
-        # Positions mapping
-        node_pos = {}
-        
-        # Inputs (Left column)
-        for i, node_id in enumerate(input_nodes):
-            node_pos[node_id] = (100, 100 + i * (self.height - 200) / (len(input_nodes) - 1 if len(input_nodes) > 1 else 1))
-            
-        # Outputs (Right column)
-        for i, node_id in enumerate(output_nodes):
-            node_pos[node_id] = (self.width - 100, self.height / 2)
-            
-        # Hidden (Middle - simple grid for now)
-        if hidden_nodes:
-            for i, node_id in enumerate(hidden_nodes):
-                node_pos[node_id] = (self.width / 2, 100 + i * (self.height - 200) / (len(hidden_nodes) - 1 if len(hidden_nodes) > 1 else 1))
-
-        # 3. Draw Connections
-        for cg in best_genome.connections.values():
-            if not cg.enabled: continue
-            
-            in_id, out_id = cg.key
-            if in_id in node_pos and out_id in node_pos:
-                start = node_pos[in_id]
-                end = node_pos[out_id]
-                
-                # Color based on weight: Green positive, Red negative
-                color = (46, 204, 113) if cg.weight > 0 else (231, 76, 60)
-                width = int(abs(cg.weight) * 1.5) + 1
-                width = min(10, width)
-                
-                pygame.draw.line(self.screen, color, start, end, width)
-
-        # 4. Draw Nodes
-        for node_id, pos in node_pos.items():
-            color = (100, 100, 100) # Hidden (Gray)
-            if node_id in input_nodes: color = (52, 152, 219) # Input (Blue)
-            if node_id in output_nodes: color = (231, 76, 60) # Output (Red)
-            
-            pygame.draw.circle(self.screen, color, (int(pos[0]), int(pos[1])), 10)
-            pygame.draw.circle(self.screen, (255, 255, 255), (int(pos[0]), int(pos[1])), 10, 1)
-            
-            # Label
-            label = self.label_font.render(str(node_id), True, (255, 255, 255))
-            self.screen.blit(label, (pos[0] + 12, pos[1] - 8))
-
-        pygame.display.flip()
-        
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                return False
-        return True
-
-    def close(self):
-        pygame.quit()
-
-# --- NEAT Logic ---
-DATA = None # Global for fitness func
-
-def eval_genomes(genomes, config):
-    global DATA
-    
-    # We want to find the best for viz, but NEAT calls this per generation
-    best_gen_fitness = -1
-    best_gen_genome = None
-    
+def eval_genomes(genomes, config, data):
     for genome_id, genome in genomes:
         net = neat.nn.FeedForwardNetwork.create(genome, config)
-        
-        # Evaluate on training data
-        correct = 0
-        total = len(DATA.y_train)
-        
-        # Batch evaluation (faster)
-        # However, neat.nn.FeedForwardNetwork expects individual calls
-        # To speed up, we can use a subset or just accept the latency
-        # For this project, let's use the whole set but we note it's slow
-        
         predictions = []
-        for inputs in DATA.X_train:
+        for inputs in data.X_train:
             output = net.activate(inputs)
             predictions.append(output[0])
-        
         predictions = np.array(predictions)
-        accuracy = np.mean((predictions >= 0.5) == DATA.y_train)
-        
+        accuracy = np.mean((predictions >= 0.5) == data.y_train)
         genome.fitness = accuracy
+
+class NEATRunner:
+    def __init__(self, data, generations=None, pop_size=None):
+        self.data = data
         
-        if accuracy > best_gen_fitness:
-            best_gen_fitness = accuracy
-            best_gen_genome = genome
+        local_dir = os.path.dirname(__file__)
+        config_path = os.path.join(local_dir, 'config-neat.txt')
+        self.config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
+                                  neat.DefaultSpeciesSet, neat.DefaultStagnation,
+                                  config_path)
 
-    # Global tracking for visualizer is handled by Repoters in neat-python
-    # But since we want real-time GUI, we'll use a hack or a custom reporter
-    pass
+        hp = ALGO_HYPERPARAMS["04_neat"]
+        self.max_gens = generations if generations is not None else hp["generations"]
+        if pop_size is not None:
+            self.config.pop_size = pop_size
 
-class PygameReporter(neat.reporting.BaseReporter):
-    def __init__(self, visualizer):
-        self.visualizer = visualizer
+        self.population = neat.Population(self.config)
+        self.population.add_reporter(neat.StdOutReporter(True))
+        stats = neat.StatisticsReporter()
+        self.population.add_reporter(stats)
+        
         self.generation = 0
-        
-    def start_generation(self, generation):
-        self.generation = generation
-        
-    def post_evaluate(self, config, population, species, best_genome):
-        info = f"Fitness Meilleur Individu: {best_genome.fitness:.4f} | Espèces: {len(species.species)}"
-        if self.visualizer:
-            self.visualizer.render(self.generation, best_genome, config, info)
+        self.best_genome = None
+        self.running = True
+        self.monitor = ResourceMonitor()
 
+    def start(self):
+        self.monitor.__enter__()
+
+    def step(self):
+        if self.generation >= self.max_gens or not self.running:
+            self.running = False
+            return False
+
+        # Run 1 generation
+        self.best_genome = self.population.run(lambda genomes, config: eval_genomes(genomes, config, self.data), 1)
+        self.generation = self.population.generation
+        return True
+
+    def finish(self):
+        self.monitor.__exit__(None, None, None)
+        self.monitor.iterations = self.generation
+        
+        winner_net = neat.nn.FeedForwardNetwork.create(self.best_genome, self.config)
+        
+        test_probs = []
+        for inputs in self.data.X_test:
+            test_probs.append(winner_net.activate(inputs)[0])
+        test_probs = np.array(test_probs)
+        
+        metrics = compute_all_metrics(self.data.y_test, test_probs, DEFAULT_THRESHOLD)
+        opt_threshold, _ = find_optimal_threshold(self.data.y_test, test_probs)
+        
+        save_metrics(metrics, "04_neat", METRICS_DIR)
+        save_resource_stats(self.monitor.get_stats(), "04_neat", METRICS_DIR)
+        
+        unknown_probs = []
+        for inputs in self.data.X_unknown:
+            unknown_probs.append(winner_net.activate(inputs)[0])
+        unknown_probs = np.array(unknown_probs)
+        save_predictions(unknown_probs, "04_neat", PREDICTIONS_DIR, threshold=opt_threshold)
+        
+        # Save winner
+        with open(os.path.join(METRICS_DIR, '04_neat_winner.pkl'), 'wb') as f:
+            pickle.dump(self.best_genome, f)
+            
+        return metrics, opt_threshold
+
+    def draw(self, surface):
+        width, height = surface.get_size()
+        surface.fill((20, 15, 25))
+        
+        if not self.best_genome: return
+        
+        font = pygame.font.SysFont("Arial", 16)
+        
+        input_nodes = self.config.genome_config.input_keys
+        output_nodes = self.config.genome_config.output_keys
+        hidden_nodes = [node_id for node_id in self.best_genome.nodes.keys() if node_id not in output_nodes and node_id not in input_nodes]
+        
+        pos = {}
+        for i, nid in enumerate(input_nodes):
+            pos[nid] = (100, 100 + i * (height - 200) / (len(input_nodes) - 1 if len(input_nodes) > 1 else 1))
+        for i, nid in enumerate(output_nodes):
+            pos[nid] = (width - 100, height / 2)
+        for i, nid in enumerate(hidden_nodes):
+            pos[nid] = (width / 2, 100 + i * (height - 200) / (len(hidden_nodes) - 1 if len(hidden_nodes) > 1 else 1))
+
+        # Connections
+        for cg in self.best_genome.connections.values():
+            if not cg.enabled: continue
+            in_id, out_id = cg.key
+            if in_id in pos and out_id in pos:
+                color = (46, 204, 113) if cg.weight > 0 else (231, 76, 60)
+                width_line = int(abs(cg.weight)) + 1
+                pygame.draw.line(surface, color, pos[in_id], pos[out_id], min(5, width_line))
+
+        # Nodes
+        for nid, p in pos.items():
+            color = (52, 152, 219) if nid in input_nodes else (231, 76, 60) if nid in output_nodes else (100, 100, 100)
+            pygame.draw.circle(surface, color, (int(p[0]), int(p[1])), 8)
+            pygame.draw.circle(surface, (255, 255, 255), (int(p[0]), int(p[1])), 8, 1)
+
+# --- compatibility main ---
 def main(no_gui=False, generations=None, pop_size=None):
-    global DATA
-    DATA = load_and_prepare_data()
+    data = load_and_prepare_data()
+    runner = NEATRunner(data, generations=generations, pop_size=pop_size)
+    runner.start()
     
-    # Load config
-    local_dir = os.path.dirname(__file__)
-    config_path = os.path.join(local_dir, 'config-neat.txt')
-    config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
-                         neat.DefaultSpeciesSet, neat.DefaultStagnation,
-                         config_path)
-
-    # Overrides from config or args
-    hp = ALGO_HYPERPARAMS["04_neat"]
-    MAX_GENS = generations if generations is not None else hp["generations"]
-    if pop_size is not None:
-        config.pop_size = pop_size
-
-    # Initialize Visualizer
-    viz = None
-    if not no_gui:
-        viz = NEATVisualizer()
-
-    # Create population
-    p = neat.Population(config)
-
-    # Add reporters
-    p.add_reporter(neat.StdOutReporter(True))
-    stats = neat.StatisticsReporter()
-    p.add_reporter(stats)
-    p.add_reporter(PygameReporter(viz))
-
-    print(f"\n  [NEAT] Début de l'évolution ({MAX_GENS} gén, pop {config.pop_size})...")
-    
-    # Run
-    # NEAT manages its own sessions, so we wrap the whole run in ResourceMonitor
-    with ResourceMonitor() as monitor:
-        winner = p.run(eval_genomes, MAX_GENS)
-        monitor.iterations = p.generation
-
-    if not no_gui:
-        viz.close()
-
-    # 5. Final Evaluation
-    winner_net = neat.nn.FeedForwardNetwork.create(winner, config)
-    
-    # Predict on test
-    test_probs = []
-    for inputs in DATA.X_test:
-        test_probs.append(winner_net.activate(inputs)[0])
-    test_probs = np.array(test_probs)
-    
-    metrics = compute_all_metrics(DATA.y_test, test_probs, DEFAULT_THRESHOLD)
-    opt_threshold, _ = find_optimal_threshold(DATA.y_test, test_probs)
-    
-    # Predict on unknown
-    unknown_probs = []
-    for inputs in DATA.X_unknown:
-        unknown_probs.append(winner_net.activate(inputs)[0])
-    unknown_probs = np.array(unknown_probs)
-    
-    # 6. Save Results
-    save_metrics(metrics, "04_neat", METRICS_DIR)
-    save_resource_stats(monitor.get_stats(), "04_neat", METRICS_DIR)
-    save_predictions(unknown_probs, "04_neat", PREDICTIONS_DIR, threshold=opt_threshold)
-    
-    # Save winner model
-    os.makedirs(METRICS_DIR, exist_ok=True)
-    with open(os.path.join(METRICS_DIR, '04_neat_winner.pkl'), 'wb') as f:
-        pickle.dump(winner, f)
-    
-    # 7. Summary
-    print_metrics_summary(metrics, "NEAT")
-    print(f"Meilleure fitness train : {winner.fitness:.4f}")
-    print(f"Topologie : {len(winner.nodes)} nodes, {len(winner.connections)} connections")
+    if no_gui:
+        while runner.step(): pass
+    else:
+        pygame.init()
+        screen = pygame.display.set_mode((1000, 700))
+        while runner.running:
+            runner.step()
+            runner.draw(screen)
+            pygame.display.flip()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT: runner.running = False
+        pygame.quit()
+        
+    runner.finish()
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="NEAT Exoplanet Classifier")
-    parser.add_argument("--no-gui", action="store_true", help="Run without Pygame visualization")
-    parser.add_argument("--generations", type=int, help="Number of generations for evolution")
-    parser.add_argument("--pop-size", type=int, help="Population size")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--no-gui", action="store_true")
+    parser.add_argument("--generations", type=int)
+    parser.add_argument("--pop-size", type=int)
     args = parser.parse_args()
-    
     main(no_gui=args.no_gui, generations=args.generations, pop_size=args.pop_size)

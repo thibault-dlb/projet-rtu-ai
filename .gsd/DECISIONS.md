@@ -15,22 +15,21 @@
 | ADR-10 | Config en Python simple (pas YAML) | Suffisant pour ce projet, pas de complexité inutile | 2026-03-10 |
 | ADR-11 | Seuil de classification configurable (défaut 0.5) | Curseur interactif dans la visualisation finale + calcul du seuil optimal via Youden's J | 2026-03-10 |
 | ADR-12 | Decorator/context manager pour mesurer ressources | Mesure automatique temps et mémoire sans dupliquer la logique dans chaque algo | 2026-03-10 |
-| ADR-13 | Next.js pour Dashboard Global | Esthétique premium, animations fluides, interface unifiée | 2026-03-10 |
+| ADR-13 | Interface Pygame Unifiée | Pivot : abandon du Web pour une interface 100% Python/Pygame plus intégrée | 2026-03-10 |
 
 ## Phase 8 Decisions: FrontEnd Dashboard
 
 **Date:** 2026-03-10
 
 ### Technology Choice
-- **Frontend**: Next.js + Tailwind CSS + Framer Motion for high-end aesthetics.
-- **Backend**: Python FastAPI to bridge with AI algorithms and stream real-time data.
-- **Visuals**: React-based charts (Recharts) and Canvas for real-time training animations (replacing/supplementing Pygame in the web view).
+- **Framework**: Pygame (pour la rapidité, l'intégration directe des algos et la cohérence visuelle).
+- **Design**: Look "Cyber/Premium" avec des composants UI personnalisés (boutons, sliders, graphiques temps réel).
+- **Logic**: Un seul point d'entrée `dashboard.py` qui importe et exécute les classes d'algorithmes.
 
 ### Approach
-- **Unified interface**: One single window to control everything.
-- **Deep Parameterization**: Sliders for iterations, population size, etc., before launch.
-- **Execution States**: Dedicated pages for Train, Test, and unknown data application.
-- **Post-run**: Animation freeze on final state with "Show Graphs" button triggers.
+- **Fenêtre Unique** : Système d'onglets ou menus pour naviguer entre "Résumé" et "Algorithmes".
+- **Paramétrage** : Sliders et boutons interactifs dans Pygame pour ajuster les itérations, etc.
+- **Visualisation Intégrée** : Les animations Pygame de chaque phase sont refactorisées pour tourner dans le dashboard principal.
 
 **Date:** 2026-03-10
 
