@@ -13,6 +13,8 @@ Aléatoire → Hill Climbing → GA → NEAT
 - Module shared/ pour code commun (DRY), exécution indépendante par algo
 - Données Kepler : 12 features, ~7326 known, ~1877 unknown
 - Split 80/20 avec seed fixe, StandardScaler (fit sur train uniquement)
+- Seuil configurable (défaut 0.5) + slider interactif + Youden's J optimal
+- **Paramétrabilité** : Itérations (`--iterations`) et Générations/Pop (`--generations`, `--pop-size`) réglables via CLI pour chaque modèle.
 
 ## Constraints & Notes
 - **Low Compute**: Les tests actuels sont effectués avec peu d'itérations/générations pour validation structurelle uniquement. Les "vrais" entraînements seront lancés ultérieurement sur une machine plus puissante.

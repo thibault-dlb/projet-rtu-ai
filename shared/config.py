@@ -81,3 +81,22 @@ ALGO_COLORS = {
     "05_hyperneat": "#9b59b6",       # Violet
     "06_wann": "#f39c12",            # Orange
 }
+
+# ─── Algorithm Hyperparameters (Defaults) ──────────────────────
+# Ces valeurs sont utilisées par défaut mais peuvent être surchargées
+# par les arguments de la ligne de commande.
+ALGO_HYPERPARAMS = {
+    "02_hill_climbing": {
+        "iterations": 5000,
+        "perturb_strength": 0.05
+    },
+    "03_genetic_algorithm": {
+        "generations": 100,
+        "pop_size": 60,
+        "mutation_rate": 0.1
+    },
+    "04_neat": {
+        "generations": 50,
+        "pop_size": 50 # Note: pop_size est aussi dans config-neat.txt
+    }
+}

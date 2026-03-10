@@ -9,12 +9,15 @@ import time
 import numpy as np
 import pygame
 
+import argparse
+
 # Set path to root for shared module access
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 from shared.config import (
     SEED, DEFAULT_THRESHOLD, RESULTS_DIR, 
-    METRICS_DIR, PREDICTIONS_DIR, ALGO_COLORS
+    METRICS_DIR, PREDICTIONS_DIR, ALGO_COLORS,
+    ALGO_HYPERPARAMS
 )
 from shared.data_loader import load_and_prepare_data
 from shared.metrics import (
@@ -122,7 +125,7 @@ class HillClimbingVisualizer:
         pygame.quit()
 
 # --- Main Logic ---
-def main(no_gui=False):
+def main(no_gui=False, iterations=None):
     # 1. Environment and Data
     np.random.seed(SEED)
     data = load_and_prepare_data()
@@ -139,8 +142,9 @@ def main(no_gui=False):
     best_b = b
     
     # HC Parameters
-    MAX_ITERS = 5000
-    PERTURB_STRENGTH = 0.05
+    hp = ALGO_HYPERPARAMS["02_hill_climbing"]
+    MAX_ITERS = iterations if iterations is not None else hp["iterations"]
+    PERTURB_STRENGTH = hp["perturb_strength"]
     STABILIZATION_WINDOW = 500
     improvement_history = []
     
@@ -209,5 +213,9 @@ def main(no_gui=False):
     print(f"Meilleure fitness train : {best_fitness:.4f}")
 
 if __name__ == "__main__":
-    headless = "--no-gui" in sys.argv
-    main(no_gui=headless)
+    parser = argparse.ArgumentParser(description="Hill Climbing Exoplanet Classifier")
+    parser.add_argument("--no-gui", action="store_true", help="Run without Pygame visualization")
+    parser.add_argument("--iterations", type=int, help="Number of iterations for optimization")
+    args = parser.parse_args()
+    
+    main(no_gui=args.no_gui, iterations=args.iterations)

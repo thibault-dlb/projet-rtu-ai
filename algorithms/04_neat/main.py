@@ -11,12 +11,15 @@ import numpy as np
 import pygame
 import neat
 
+import argparse
+
 # Set path to root for shared module access
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 from shared.config import (
     SEED, DEFAULT_THRESHOLD, RESULTS_DIR, 
-    METRICS_DIR, PREDICTIONS_DIR, ALGO_COLORS
+    METRICS_DIR, PREDICTIONS_DIR, ALGO_COLORS,
+    ALGO_HYPERPARAMS
 )
 from shared.data_loader import load_and_prepare_data
 from shared.metrics import (
@@ -166,7 +169,7 @@ class PygameReporter(neat.reporting.BaseReporter):
         if self.visualizer:
             self.visualizer.render(self.generation, best_genome, config, info)
 
-def main(no_gui=False):
+def main(no_gui=False, generations=None, pop_size=None):
     global DATA
     DATA = load_and_prepare_data()
     
@@ -176,6 +179,12 @@ def main(no_gui=False):
     config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
                          neat.DefaultSpeciesSet, neat.DefaultStagnation,
                          config_path)
+
+    # Overrides from config or args
+    hp = ALGO_HYPERPARAMS["04_neat"]
+    MAX_GENS = generations if generations is not None else hp["generations"]
+    if pop_size is not None:
+        config.pop_size = pop_size
 
     # Initialize Visualizer
     viz = None
@@ -191,12 +200,12 @@ def main(no_gui=False):
     p.add_reporter(stats)
     p.add_reporter(PygameReporter(viz))
 
-    print("\n  [NEAT] Début de l'évolution (Topologie + Poids)...")
+    print(f"\n  [NEAT] Début de l'évolution ({MAX_GENS} gén, pop {config.pop_size})...")
     
     # Run
     # NEAT manages its own sessions, so we wrap the whole run in ResourceMonitor
     with ResourceMonitor() as monitor:
-        winner = p.run(eval_genomes, 20) # 20 generations
+        winner = p.run(eval_genomes, MAX_GENS)
         monitor.iterations = p.generation
 
     if not no_gui:
@@ -236,5 +245,10 @@ def main(no_gui=False):
     print(f"Topologie : {len(winner.nodes)} nodes, {len(winner.connections)} connections")
 
 if __name__ == "__main__":
-    headless = "--no-gui" in sys.argv
-    main(no_gui=headless)
+    parser = argparse.ArgumentParser(description="NEAT Exoplanet Classifier")
+    parser.add_argument("--no-gui", action="store_true", help="Run without Pygame visualization")
+    parser.add_argument("--generations", type=int, help="Number of generations for evolution")
+    parser.add_argument("--pop-size", type=int, help="Population size")
+    args = parser.parse_args()
+    
+    main(no_gui=args.no_gui, generations=args.generations, pop_size=args.pop_size)

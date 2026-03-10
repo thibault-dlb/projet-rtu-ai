@@ -9,12 +9,15 @@ import time
 import numpy as np
 import pygame
 
+import argparse
+
 # Set path to root for shared module access
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 from shared.config import (
     SEED, DEFAULT_THRESHOLD, RESULTS_DIR, 
-    METRICS_DIR, PREDICTIONS_DIR, ALGO_COLORS
+    METRICS_DIR, PREDICTIONS_DIR, ALGO_COLORS,
+    ALGO_HYPERPARAMS
 )
 from shared.data_loader import load_and_prepare_data
 from shared.metrics import (
@@ -140,15 +143,16 @@ def mutate(individual, rate=0.1, sigma=0.2):
     return individual
 
 # --- Main Logic ---
-def main(no_gui=False):
+def main(no_gui=False, generations=None, pop_size=None):
     np.random.seed(SEED)
     data = load_and_prepare_data()
     n_params = data.X_train.shape[1] + 1 # 12 weights + 1 bias
     
     # GA Parameters
-    POP_SIZE = 60
-    MAX_GENS = 100
-    MUTATION_RATE = 0.1
+    hp = ALGO_HYPERPARAMS["03_genetic_algorithm"]
+    POP_SIZE = pop_size if pop_size is not None else hp["pop_size"]
+    MAX_GENS = generations if generations is not None else hp["generations"]
+    MUTATION_RATE = hp["mutation_rate"]
     MUTATION_SIGMA = 0.2
     ELITISM_COUNT = 2
     
@@ -233,5 +237,10 @@ def main(no_gui=False):
     print(f"Meilleure fitness train : {best_overall_fit:.4f}")
 
 if __name__ == "__main__":
-    headless = "--no-gui" in sys.argv
-    main(no_gui=headless)
+    parser = argparse.ArgumentParser(description="Genetic Algorithm Exoplanet Classifier")
+    parser.add_argument("--no-gui", action="store_true", help="Run without Pygame visualization")
+    parser.add_argument("--generations", type=int, help="Number of generations for evolution")
+    parser.add_argument("--pop-size", type=int, help="Population size")
+    args = parser.parse_args()
+    
+    main(no_gui=args.no_gui, generations=args.generations, pop_size=args.pop_size)
