@@ -33,7 +33,7 @@
 **Dependencies**: Phase 1
 
 ### Phase 3: Hill Climbing
-**Status**: ⬜ Not Started
+**Status**: ✅ Complete
 **Objective**: Implémenter l'optimisation d'un perceptron par Hill Climbing
 **Deliverables**:
 - `algorithms/02_hill_climbing/main.py` — Perceptron + perturbation des poids
