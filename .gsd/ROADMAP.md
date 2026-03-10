@@ -13,7 +13,7 @@
 ## Phases
 
 ### Phase 1: Foundation — Infrastructure partagée
-**Status**: ⬜ Not Started
+**Status**: ✅ Complete
 **Objective**: Mettre en place le module `shared/` (data loading, metrics, config) et la structure du projet
 **Deliverables**:
 - `shared/config.py` — Configuration globale (seed, paths, split ratio)
