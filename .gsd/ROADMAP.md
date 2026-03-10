@@ -50,9 +50,9 @@
 - Critère d'arrêt par stabilisation
 **Dependencies**: Phase 1
 
-### Phase 5: NEAT
-**Status**: ⬜ Not Started
-**Objective**: Implémenter NEAT avec `neat-python`, visualisation du réseau en temps réel
+### Phase 5: NeuroEvolution (NEAT)
+**Status**: ✅ Complete
+**Objective**: Implémenter NEAT avec évolution de topologie et poids, visualisation du réseau en temps réel
 **Deliverables**:
 - `algorithms/04_neat/main.py` — Configuration et exécution NEAT
 - `algorithms/04_neat/config-neat.txt` — Fichier de configuration NEAT

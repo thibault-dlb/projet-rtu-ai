@@ -1,7 +1,7 @@
 # STATE.md — Project Memory
 
 > **Last Updated**: 2026-03-10
-> **Current Phase**: 4 (completed)
+> **Current Phase**: 5 (completed)
 > **Session**: 1
 
 ## Project Summary
@@ -21,13 +21,14 @@ Aléatoire → Hill Climbing → GA → NEAT → (HyperNEAT, WANN)
 - [x] Phase 2: Random Baseline (verified)
 - [x] Phase 3: Hill Climbing (verified)
 - [x] Phase 4: GA (verified)
-- [ ] Phase 5: NEAT
+- [x] Phase 5: NEAT (verified)
+- [ ] Phase 6: Results Comparison
 
 ## Last Session Summary
-Phase 4 terminée.
-- Algorithme Génétique implémenté avec succès.
-- Accuracy Test : 83.15%.
-- Visualisation Pygame de la population complète.
+Phase 5 terminée.
+- NEAT opérationnel avec évolution de topologie.
+- Visualisation Pygame des graphes de neurones intégrée.
+- Résultats exportés.
 
 ## Next Steps
-1. /plan 5 (NEAT)
+1. /execute 6 (Comparaision finale)
