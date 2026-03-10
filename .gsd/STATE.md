@@ -27,6 +27,7 @@ Aléatoire → Hill Climbing → GA → NEAT
 - [x] Phase 5: NEAT (Verified)
 - [x] Phase 6: Results Comparison (Verified)
 - [ ] Phase 7: Extensions (Optional/Future)
+- [ ] Phase 8: FrontEnd Dashboard
 
 ## Final Results Overview
 | Algorithme           | Accuracy | F1-Score | ROC AUC |

@@ -78,3 +78,12 @@ comparatifs et les prédictions sur les données inconnues
 - `algorithms/06_wann/main.py` — WANN
 - Intégration dans les résultats comparatifs
 **Dependencies**: Phase 5
+
+### Phase 8: FrontEnd — Dashboard Global
+**Status**: ⬜ Not Started
+**Objective**: Créer une interface unifiée pour piloter l'ensemble du projet, lancer les algorithmes et tout visualiser sans passer par la ligne de commande.
+**Deliverables**:
+- Interface principale (Dashboard) intégrée
+- Contrôle des algorithmes (Lancement / Stop) via GUI
+- Affichage des graphiques et métriques en temps réel
+**Dependencies**: Phase 6
