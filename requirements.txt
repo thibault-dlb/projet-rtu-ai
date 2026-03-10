@@ -1,0 +1,9 @@
+# Kepler Exoplanet Classification Project
+# Dependencies for evolutionary AI algorithms and visualization
+
+numpy
+pandas
+scikit-learn
+matplotlib
+pygame
+neat-python
