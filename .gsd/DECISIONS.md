@@ -15,8 +15,22 @@
 | ADR-10 | Config en Python simple (pas YAML) | Suffisant pour ce projet, pas de complexité inutile | 2026-03-10 |
 | ADR-11 | Seuil de classification configurable (défaut 0.5) | Curseur interactif dans la visualisation finale + calcul du seuil optimal via Youden's J | 2026-03-10 |
 | ADR-12 | Decorator/context manager pour mesurer ressources | Mesure automatique temps et mémoire sans dupliquer la logique dans chaque algo | 2026-03-10 |
+| ADR-13 | Next.js pour Dashboard Global | Esthétique premium, animations fluides, interface unifiée | 2026-03-10 |
 
-## Phase 1 Decisions
+## Phase 8 Decisions: FrontEnd Dashboard
+
+**Date:** 2026-03-10
+
+### Technology Choice
+- **Frontend**: Next.js + Tailwind CSS + Framer Motion for high-end aesthetics.
+- **Backend**: Python FastAPI to bridge with AI algorithms and stream real-time data.
+- **Visuals**: React-based charts (Recharts) and Canvas for real-time training animations (replacing/supplementing Pygame in the web view).
+
+### Approach
+- **Unified interface**: One single window to control everything.
+- **Deep Parameterization**: Sliders for iterations, population size, etc., before launch.
+- **Execution States**: Dedicated pages for Train, Test, and unknown data application.
+- **Post-run**: Animation freeze on final state with "Show Graphs" button triggers.
 
 **Date:** 2026-03-10
 
