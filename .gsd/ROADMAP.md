@@ -24,7 +24,7 @@
 - Structure de dossiers (`algorithms/`, `results/`)
 
 ### Phase 2: Baseline — Algorithme Aléatoire
-**Status**: ⬜ Not Started
+**Status**: ✅ Complete
 **Objective**: Implémenter le baseline aléatoire comme point de comparaison
 **Deliverables**:
 - `algorithms/01_random/main.py` — Génération de probabilités aléatoires

@@ -1,7 +1,7 @@
 # STATE.md — Project Memory
 
 > **Last Updated**: 2026-03-10
-> **Current Phase**: 1 (completed)
+> **Current Phase**: 2 (completed)
 > **Session**: 1
 
 ## Project Summary
@@ -14,25 +14,22 @@ Aléatoire → Hill Climbing → GA → NEAT → (HyperNEAT, WANN)
 - Données Kepler : 12 features, ~7326 known, ~1877 unknown
 - Split 80/20 avec seed fixe, StandardScaler (fit sur train uniquement)
 - Seuil configurable (défaut 0.5) + slider interactif + Youden's J optimal
-- ResourceMonitor (context manager) pour temps et mémoire
 
 ## Current Position
 - [x] SPEC.md finalized
 - [x] ROADMAP.md created
 - [x] Phase 1: Foundation (verified)
-- [ ] Phase 2: Random baseline
+- [x] Phase 2: Random Baseline (verified)
 - [ ] Phase 3: Hill Climbing
 - [ ] Phase 4: GA
 - [ ] Phase 5: NEAT
-- [ ] Phase 6: Results
-- [ ] Phase 7: Extensions
 
 ## Last Session Summary
-Phase 1 exécutée avec succès. 
-- Infrastructure partagée (`shared/`) complète.
-- Data loader validé (Train: 5860, Test: 1466, 12 features).
-- Système de métriques et monitoring de ressources fonctionnel.
-- Visualisation matplotlib implémentée avec outil de seuil interactif.
+Phase 2 terminée.
+- Algorithme Aléatoire implémenté dans `algorithms/01_random/main.py`.
+- Visualisation Pygame (animation de distribution) opérationnelle.
+- Baseline établie : Accuracy ~50%, AUC ~0.5.
+- Résultats sauvegardés dans `results/`.
 
 ## Next Steps
-1. /plan 2 (Algorithme Aléatoire)
+1. /plan 3 (Hill Climbing)
