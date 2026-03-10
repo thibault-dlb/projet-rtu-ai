@@ -1,7 +1,7 @@
 # STATE.md — Project Memory
 
 > **Last Updated**: 2026-03-10
-> **Current Phase**: 3 (completed)
+> **Current Phase**: 4 (completed)
 > **Session**: 1
 
 ## Project Summary
@@ -10,10 +10,9 @@ Aléatoire → Hill Climbing → GA → NEAT → (HyperNEAT, WANN)
 
 ## Key Decisions
 - Python 3.x, Pygame pour temps réel, matplotlib pour résultats
-- Module shared/ pour code commun, exécution indépendante par algo
+- Module shared/ pour code commun (DRY), exécution indépendante par algo
 - Données Kepler : 12 features, ~7326 known, ~1877 unknown
 - Split 80/20 avec seed fixe, StandardScaler (fit sur train uniquement)
-- Seuil configurable (défaut 0.5) + slider interactif + Youden's J optimal
 
 ## Current Position
 - [x] SPEC.md finalized
@@ -21,14 +20,14 @@ Aléatoire → Hill Climbing → GA → NEAT → (HyperNEAT, WANN)
 - [x] Phase 1: Foundation (verified)
 - [x] Phase 2: Random Baseline (verified)
 - [x] Phase 3: Hill Climbing (verified)
-- [ ] Phase 4: GA
+- [x] Phase 4: GA (verified)
 - [ ] Phase 5: NEAT
 
 ## Last Session Summary
-Phase 3 terminée.
-- Hill Climbing sur perceptron implémenté.
-- Accuracy Test : 83.15% (Progression majeure).
-- Visualisation Pygame interactive (poids + fitness).
+Phase 4 terminée.
+- Algorithme Génétique implémenté avec succès.
+- Accuracy Test : 83.15%.
+- Visualisation Pygame de la population complète.
 
 ## Next Steps
-1. /plan 4 (Genetic Algorithm)
+1. /plan 5 (NEAT)
