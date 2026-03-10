@@ -59,9 +59,10 @@
 - Visualisation Pygame : réseau de neurones du meilleur individu en direct
 **Dependencies**: Phase 1
 
-### Phase 6: Résultats comparatifs et prédictions finales
-**Status**: ⬜ Not Started
-**Objective**: Générer les graphiques comparatifs et les prédictions sur les données inconnues
+### Phase 6: Résultats et Comparaison
+**Status**: ✅ Complete
+**Objective**: Synthèse des performances et graphiques finaux
+comparatifs et les prédictions sur les données inconnues
 **Deliverables**:
 - Script de comparaison globale
 - Graphiques matplotlib : barplots, ROC curves, matrices de confusion

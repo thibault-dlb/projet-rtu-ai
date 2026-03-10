@@ -1,12 +1,12 @@
 # STATE.md — Project Memory
 
 > **Last Updated**: 2026-03-10
-> **Current Phase**: 5 (completed)
+> **Current Phase**: 6 (completed)
 > **Session**: 1
 
 ## Project Summary
 Classification d'exoplanètes Kepler avec une progression d'algorithmes :
-Aléatoire → Hill Climbing → GA → NEAT → (HyperNEAT, WANN)
+Aléatoire → Hill Climbing → GA → NEAT
 
 ## Key Decisions
 - Python 3.x, Pygame pour temps réel, matplotlib pour résultats
@@ -14,21 +14,26 @@ Aléatoire → Hill Climbing → GA → NEAT → (HyperNEAT, WANN)
 - Données Kepler : 12 features, ~7326 known, ~1877 unknown
 - Split 80/20 avec seed fixe, StandardScaler (fit sur train uniquement)
 
-## Current Position
-- [x] SPEC.md finalized
-- [x] ROADMAP.md created
-- [x] Phase 1: Foundation (verified)
-- [x] Phase 2: Random Baseline (verified)
-- [x] Phase 3: Hill Climbing (verified)
-- [x] Phase 4: GA (verified)
-- [x] Phase 5: NEAT (verified)
-- [ ] Phase 6: Results Comparison
+## Constraints & Notes
+- **Low Compute**: Les tests actuels sont effectués avec peu d'itérations/générations pour validation structurelle uniquement. Les "vrais" entraînements seront lancés ultérieurement sur une machine plus puissante.
 
-## Last Session Summary
-Phase 5 terminée.
-- NEAT opérationnel avec évolution de topologie.
-- Visualisation Pygame des graphes de neurones intégrée.
-- Résultats exportés.
+## Current Position
+- [x] Phase 1: Foundation (Verified)
+- [x] Phase 2: Random Baseline (Verified)
+- [x] Phase 3: Hill Climbing (Verified)
+- [x] Phase 4: GA (Verified)
+- [x] Phase 5: NEAT (Verified)
+- [x] Phase 6: Results Comparison (Verified)
+- [ ] Phase 7: Extensions (Optional/Future)
+
+## Final Results Overview
+| Algorithme           | Accuracy | F1-Score | ROC AUC |
+|:---------------------|:---------|:---------|:--------|
+| Hill Climbing        | 0.8315   | 0.7883   | 0.8942  |
+| Algorithme Génétique | 0.8315   | 0.7777   | 0.8848  |
+| NEAT (20 gens)       | 0.7838   | 0.7217   | 0.8315  |
+| Aléatoire            | 0.5082   | 0.4415   | 0.5073  |
 
 ## Next Steps
-1. /execute 6 (Comparaision finale)
+1. Projet prêt pour exécution intensive.
+2. Facultatif : Implémenter HyperNEAT ou WANN.
