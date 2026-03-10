@@ -10,3 +10,28 @@
 | ADR-05 | Hill Climbing sur perceptron simple | Point intermédiaire logique entre random et GA, simple à visualiser | 2026-03-10 |
 | ADR-06 | neat-python comme librairie NEAT | Implémentation Python de référence, bien documentée | 2026-03-10 |
 | ADR-07 | Split 80/20 avec seed fixe | Standard ML, reproductibilité garantie | 2026-03-10 |
+| ADR-08 | StandardScaler pour normalisation | Gère mieux les outliers présents dans les données Kepler (koi_insol, koi_prad extrêmes) | 2026-03-10 |
+| ADR-09 | Numpy arrays comme format de données | Plus rapide pour le calcul numérique, noms de colonnes accessibles séparément | 2026-03-10 |
+| ADR-10 | Config en Python simple (pas YAML) | Suffisant pour ce projet, pas de complexité inutile | 2026-03-10 |
+| ADR-11 | Seuil de classification configurable (défaut 0.5) | Curseur interactif dans la visualisation finale + calcul du seuil optimal via Youden's J | 2026-03-10 |
+| ADR-12 | Decorator/context manager pour mesurer ressources | Mesure automatique temps et mémoire sans dupliquer la logique dans chaque algo | 2026-03-10 |
+
+## Phase 1 Decisions
+
+**Date:** 2026-03-10
+
+### Scope
+- Module shared/ avec : config.py, data_loader.py, metrics.py, visualization.py
+- Normalisation par StandardScaler (fit sur train, transform sur train+test+unknown)
+- Données retournées en numpy arrays, noms de colonnes accessibles séparément
+
+### Approach
+- Config en constantes Python simples
+- Interface standard `evaluate()` pour les métriques
+- Seuil configurable par algo (défaut 0.5)
+- Calcul automatique du seuil optimal via Youden's J statistic sur la courbe ROC
+- Curseur interactif (slider) dans la visualisation finale matplotlib pour ajuster le seuil et voir les métriques se recalculer en temps réel
+
+### Constraints
+- Le StandardScaler doit être fit uniquement sur les données d'entraînement (pas de data leakage)
+- Le seed doit être appliqué avant tout split/shuffle
