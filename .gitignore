@@ -8,10 +8,7 @@ env/
 venv/
 .env
 
-# Data (Datasets are too large or local)
-known_data.csv
-unknown_data.csv
-evolution_history.json
+# Data (Tracked for convenience)
 classification_results.csv
 
 # Manim
