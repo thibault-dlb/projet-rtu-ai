@@ -9,6 +9,7 @@ Tracks per-generation metrics for live visualization.
 import neat
 import numpy as np
 import time
+import json
 from sklearn.metrics import f1_score, confusion_matrix, classification_report
 from data_loader import ExoplanetDataLoader
 
@@ -37,6 +38,7 @@ class NeatEngine:
             'num_species': [],
             'best_nodes': [],
             'best_connections': [],
+            'topology_snapshots': [],
         }
 
     # ------------------------------------------------------------------
@@ -74,6 +76,14 @@ class NeatEngine:
         self._history['num_species'].append(n_species)
         self._history['best_nodes'].append(n_nodes)
         self._history['best_connections'].append(n_conns)
+        
+        # Capture snapshot for video export
+        snapshot = {
+            'iteration': gen,
+            'best_fitness': best_f,
+            'topology': self.get_topology_info(best_genome)
+        }
+        self._history['topology_snapshots'].append(snapshot)
 
         if self._callback:
             self._callback(gen, {
@@ -84,6 +94,7 @@ class NeatEngine:
                 'best_nodes': n_nodes,
                 'best_connections': n_conns,
                 'elapsed_time': time.time() - self._start_time,
+                'topology': self.get_topology_info(best_genome)
             })
 
     # ------------------------------------------------------------------
@@ -154,15 +165,34 @@ class NeatEngine:
 
         n_nodes = len(genome.nodes)
         connections = [(k, v.weight, v.enabled) for k, v in genome.connections.items()]
-        enabled_conns = [c for c in connections if c[2]]
+        enabled_conns = [((c[0][0], c[0][1]), c[1]) for c in connections if c[2]]
 
         return {
             'num_nodes': n_nodes,
-            'num_connections': len(enabled_conns),
-            'total_connections': len(connections),
             'node_keys': list(genome.nodes.keys()),
-            'connections': [(c[0], c[1]) for c in enabled_conns],
+            'connections': enabled_conns,
         }
+
+    def save_history(self, filepath="evolution_history.json"):
+        """Save the captured evolution history to a JSON file."""
+        # Convert tuples in connections to lists for JSON serializability
+        serializable_history = []
+        for frame in self.stats.generation_statistics:
+            # We need to rebuild the topology for each generation's best if we want full animation
+            # But the stats reporter only keeps fitness. 
+            # Our custom _generation_reporter already populates self._history.
+            pass
+        
+        # Actually, let's just save self._history if it contains enough info
+        # Or better: let's modify the engine to capture snapshots
+        
+        # For simplicity in this project, we'll save the best topology of each generation 
+        # that we already captured in self._history['topology_snapshots'] (to be added)
+        if 'topology_snapshots' in self._history:
+            with open(filepath, 'w') as f:
+                json.dump(self._history['topology_snapshots'], f)
+            return True
+        return False
 
 
 # ======================================================================

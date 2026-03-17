@@ -152,6 +152,12 @@ class AIEngine:
         self.last_test_results = metrics
         return metrics
 
+    def save_history(self, filepath="evolution_history.json"):
+        """Save training history if supported by the algorithm."""
+        if self.algorithm_type == AlgorithmType.NEAT and self.neat_engine:
+            return self.neat_engine.save_history(filepath)
+        return False
+
 
 if __name__ == "__main__":
     # Test unified engine
