@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.env
+
+# Data (Datasets are too large or local)
+known_data.csv
+unknown_data.csv
+evolution_history.json
+classification_results.csv
+
+# Manim
+media/
+media_info/
+
+# IDE
+.vscode/
+.idea/
+.gemini/
+
+# Project Specific
+neat-checkpoint-*
